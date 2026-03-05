@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Sorter</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Setup Screen -->
+  <div id="setup-screen" class="screen">
+    <div class="setup-container">
+      <h1>Media Sorter</h1>
+      <p class="subtitle">Sort your media into groups with keyboard shortcuts</p>
+
+      <div id="config-loaded" class="config-badge hidden">Settings loaded from previous session</div>
+
+      <div class="form-section">
+        <label for="source-folder">Source Folder</label>
+        <div class="folder-input-row">
+          <input type="text" id="source-folder" placeholder="~/Desktop/unsorted-media">
+          <button type="button" id="browse-btn" class="btn-browse">Browse</button>
+        </div>
+      </div>
+
+      <!-- Folder Picker Modal -->
+      <div id="folder-modal" class="folder-modal hidden">
+        <div class="folder-modal-content">
+          <div class="folder-modal-header">
+            <h3>Select Folder</h3>
+            <button type="button" id="folder-modal-close" class="btn-icon">&times;</button>
+          </div>
+          <div class="folder-path-bar" id="folder-path-bar"></div>
+          <div class="folder-media-count" id="folder-media-count"></div>
+          <div class="folder-list" id="folder-list"></div>
+          <div class="folder-modal-footer">
+            <button type="button" id="folder-cancel" class="btn-secondary">Cancel</button>
+            <button type="button" id="folder-select" class="btn-primary">Select This Folder</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label>Group Names <span class="hint">(keys 1–8)</span></label>
+        <div class="group-inputs">
+          <div class="group-row"><span class="key-badge">1</span><input type="text" class="group-name" data-index="0" placeholder="Group 1"></div>
+          <div class="group-row"><span class="key-badge">2</span><input type="text" class="group-name" data-index="1" placeholder="Group 2"></div>
+          <div class="group-row"><span class="key-badge">3</span><input type="text" class="group-name" data-index="2" placeholder="Group 3"></div>
+          <div class="group-row"><span class="key-badge">4</span><input type="text" class="group-name" data-index="3" placeholder="Group 4"></div>
+          <div class="group-row"><span class="key-badge">5</span><input type="text" class="group-name" data-index="4" placeholder="Group 5"></div>
+          <div class="group-row"><span class="key-badge">6</span><input type="text" class="group-name" data-index="5" placeholder="Group 6"></div>
+          <div class="group-row"><span class="key-badge">7</span><input type="text" class="group-name" data-index="6" placeholder="Group 7"></div>
+          <div class="group-row"><span class="key-badge">8</span><input type="text" class="group-name" data-index="7" placeholder="Group 8"></div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">Start Sorting</button>
+      <div id="setup-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+
+  <!-- Sorting Screen -->
+  <div id="sort-screen" class="screen hidden">
+    <div id="coverflow" class="coverflow"></div>
+    <div id="current-filename" class="current-filename"></div>
+    <div id="floating-groups" class="floating-groups"></div>
+
+    <div id="hud" class="hud">
+      <div class="hud-info">
+        <span id="counter">0 / 0 sorted</span>
+        <span class="hud-controls">S: skip &middot; Z: undo</span>
+      </div>
+    </div>
+
+    <div id="done-overlay" class="done-overlay hidden">
+      <div class="done-content">
+        <h2>All done!</h2>
+        <p id="done-summary"></p>
+        <button id="back-btn" class="btn-primary">Back to Setup</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
