@@ -131,6 +131,23 @@ input[type="text"]:focus {
   margin-top: 0.5rem;
 }
 
+.btn-quit {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 0.5rem;
+}
+.btn-quit:hover {
+  background: #e63939;
+}
+
 .btn-primary:hover {
   background: var(--accent-hover);
 }

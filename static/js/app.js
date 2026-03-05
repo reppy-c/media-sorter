@@ -42,8 +42,9 @@
   function getSetupValues() {
     const source = $("#source-folder").value.trim();
     const groupNames = [];
-    $$(".group-name").forEach((input, i) => {
-      groupNames.push(input.value.trim() || `Group ${i + 1}`);
+    $$(".group-name").forEach((input) => {
+      const name = input.value.trim();
+      if (name) groupNames.push(name);
     });
     return { source, groups: groupNames };
   }
@@ -52,6 +53,10 @@
     const { source, groups: groupNames } = getSetupValues();
     if (!source) {
       showError("Please enter a source folder path.");
+      return;
+    }
+    if (groupNames.length === 0) {
+      showError("Please enter at least one group name.");
       return;
     }
 
@@ -298,11 +303,20 @@
         e.preventDefault();
         undo();
       }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        backToSetup();
+      }
       return;
     }
 
+    if (e.key === "0" && groups.length >= 10) {
+      e.preventDefault();
+      sortCurrent(9);
+      return;
+    }
     const num = parseInt(e.key);
-    if (num >= 1 && num <= groups.length) {
+    if (num >= 1 && num <= 9 && num <= groups.length) {
       e.preventDefault();
       sortCurrent(num - 1);
       return;
@@ -317,6 +331,18 @@
     if (e.key === "z" || e.key === "Z") {
       e.preventDefault();
       undo();
+      return;
+    }
+
+    if (e.key === "x" || e.key === "X") {
+      e.preventDefault();
+      quitApp();
+      return;
+    }
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      backToSetup();
       return;
     }
   }
@@ -394,9 +420,18 @@
 
   // ── Init ──
 
+  async function quitApp() {
+    try {
+      await fetch("/api/quit", { method: "POST" });
+    } catch {
+      // Server exits, connection drops — expected
+    }
+  }
+
   document.addEventListener("keydown", handleKey);
   $("#start-btn").addEventListener("click", startSession);
   $("#back-btn").addEventListener("click", backToSetup);
+  $("#quit-btn-setup").addEventListener("click", quitApp);
   $("#browse-btn").addEventListener("click", openFolderBrowser);
   $("#folder-modal-close").addEventListener("click", closeFolderBrowser);
   $("#folder-cancel").addEventListener("click", closeFolderBrowser);

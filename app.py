@@ -1,13 +1,24 @@
 import json
 import os
+import sys
 import shutil
 import webbrowser
+import threading
+import time
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_from_directory
 
-app = Flask(__name__)
+# Support running as PyInstaller bundle (single executable)
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys._MEIPASS)
+    CONFIG_DIR = Path.home() / "Library" / "Application Support" / "Media Sorter"
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    CONFIG_PATH = CONFIG_DIR / "config.json"
+else:
+    BASE_DIR = Path(__file__).parent
+    CONFIG_PATH = BASE_DIR / "config.json"
 
-CONFIG_PATH = Path(__file__).parent / "config.json"
+app = Flask(__name__, template_folder=str(BASE_DIR / "templates"), static_folder=str(BASE_DIR / "static"))
 SUPPORTED_EXTENSIONS = {
     "image": {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"},
     "video": {".mp4", ".mov", ".webm", ".avi", ".mkv", ".m4v"},
@@ -115,9 +126,14 @@ def start_session():
 
     # Sorted folders live inside source, named "1 - Name", "2 - Name", ...
     sorted_folder = source_folder
-    for i, group_name in enumerate(groups):
-        folder_name = f"{i + 1} - {group_name}"
-        os.makedirs(os.path.join(sorted_folder, folder_name), exist_ok=True)
+    try:
+        for i, group_name in enumerate(groups):
+            folder_name = f"{i + 1} - {group_name}"
+            os.makedirs(os.path.join(sorted_folder, folder_name), exist_ok=True)
+    except PermissionError:
+        return jsonify({
+            "error": "Permission denied: cannot create folders in that location. Try a different folder or grant the app Full Disk Access in System Settings → Privacy & Security."
+        }), 403
 
     save_config(data["source_folder"], groups)
 
@@ -175,6 +191,17 @@ def serve_media(filename):
     return send_from_directory(source_folder, filename)
 
 
+@app.route("/api/quit", methods=["POST"])
+def quit_app():
+    """Exit the app so the server process stops (e.g. when running as .app)."""
+    os._exit(0)
+
+
+def _open_browser():
+    time.sleep(1.2)
+    webbrowser.open("http://127.0.0.1:5000")
+
+
 if __name__ == "__main__":
-    webbrowser.open("http://localhost:5000")
-    app.run(debug=False, port=5000)
+    threading.Thread(target=_open_browser, daemon=True).start()
+    app.run(debug=False, port=5000, host="127.0.0.1")

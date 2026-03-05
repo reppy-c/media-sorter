@@ -40,7 +40,7 @@
       </div>
 
       <div class="form-section">
-        <label>Group Names <span class="hint">(keys 1–8)</span></label>
+        <label>Group Names <span class="hint">(keys 1–9, 0)</span></label>
         <div class="group-inputs">
           <div class="group-row"><span class="key-badge">1</span><input type="text" class="group-name" data-index="0" placeholder="Group 1"></div>
           <div class="group-row"><span class="key-badge">2</span><input type="text" class="group-name" data-index="1" placeholder="Group 2"></div>
@@ -50,10 +50,13 @@
           <div class="group-row"><span class="key-badge">6</span><input type="text" class="group-name" data-index="5" placeholder="Group 6"></div>
           <div class="group-row"><span class="key-badge">7</span><input type="text" class="group-name" data-index="6" placeholder="Group 7"></div>
           <div class="group-row"><span class="key-badge">8</span><input type="text" class="group-name" data-index="7" placeholder="Group 8"></div>
+          <div class="group-row"><span class="key-badge">9</span><input type="text" class="group-name" data-index="8" placeholder=""></div>
+          <div class="group-row"><span class="key-badge">0</span><input type="text" class="group-name" data-index="9" placeholder=""></div>
         </div>
       </div>
 
       <button id="start-btn" class="btn-primary">Start Sorting</button>
+      <button type="button" id="quit-btn-setup" class="btn-quit">Quit</button>
       <div id="setup-error" class="error-msg hidden"></div>
     </div>
   </div>
@@ -66,7 +69,7 @@
     <div id="hud" class="hud">
       <div class="hud-info">
         <span id="counter">0 / 0 sorted</span>
-        <span class="hud-controls">S: skip &middot; Z: undo</span>
+        <span class="hud-controls">S: skip &middot; Z: undo &middot; X: exit &middot; Esc: back</span>
       </div>
     </div>
 
