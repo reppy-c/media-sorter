@@ -113,15 +113,23 @@ def start_session():
     if not os.path.isdir(source_folder):
         return jsonify({"error": f"Folder not found: {source_folder}"}), 400
 
-    sorted_folder = source_folder.rstrip("/") + "_sorted"
-    for group_name in groups:
-        os.makedirs(os.path.join(sorted_folder, group_name), exist_ok=True)
+    # Sorted folders live inside source, named "1 - Name", "2 - Name", ...
+    sorted_folder = source_folder
+    for i, group_name in enumerate(groups):
+        folder_name = f"{i + 1} - {group_name}"
+        os.makedirs(os.path.join(sorted_folder, folder_name), exist_ok=True)
 
     save_config(data["source_folder"], groups)
 
     files = get_media_files(source_folder)
     file_info = [{"name": f, "type": file_type(f)} for f in files]
     return jsonify({"files": file_info, "total": len(file_info)})
+
+
+def _group_folder_name(group):
+    """Folder name for a group: '1 - Name', '2 - Name', ..."""
+    i = groups.index(group)
+    return f"{i + 1} - {group}"
 
 
 @app.route("/api/sort", methods=["POST"])
@@ -131,7 +139,7 @@ def sort_file():
     group = data["group"]
 
     src = os.path.join(source_folder, filename)
-    dst_dir = os.path.join(sorted_folder, group)
+    dst_dir = os.path.join(sorted_folder, _group_folder_name(group))
     dst = os.path.join(dst_dir, filename)
 
     if not os.path.exists(src):
@@ -152,7 +160,7 @@ def undo():
     filename = action["filename"]
     group = action["group"]
 
-    src = os.path.join(sorted_folder, group, filename)
+    src = os.path.join(sorted_folder, _group_folder_name(group), filename)
     dst = os.path.join(source_folder, filename)
 
     if not os.path.exists(src):
