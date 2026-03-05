@@ -1,8 +1,13 @@
 (() => {
   const STACK_SIZE = 5; // current + 4 behind
   const SCALE_STEP = 0.06;
-  const OPACITY_STEP = 0.15;
-  const Y_OFFSETS = [0, 44, 78, 104, 124];
+  const SCRIM_OPACITY_STEP = 0.2; // black scrim opacity per layer (0 = front, darker behind)
+  // Front card at bottom-center; each card behind steps up (cascading fan)
+  const STACK_BASE_Y = 90; // px below center for front card
+  const STACK_Y_STEP = -48; // px per layer (negative = upward)
+  const Y_OFFSETS = [0, 1, 2, 3, 4].map((i) => STACK_BASE_Y + i * STACK_Y_STEP);
+  // Shift whole stack up so rearmost (top) card top edge is ~10% from top
+  const STACK_SHIFT_UP_VH = 0.07; // viewport fraction: top card’s top edge ~10vh from top
 
   let groups = [];
   let fileQueue = [];
@@ -29,7 +34,6 @@
           if (input) input.value = name;
         });
       }
-      $("#config-loaded").classList.remove("hidden");
     } catch {
       // no saved config
     }
@@ -127,8 +131,6 @@
 
   function updateCounter() {
     $("#counter").textContent = `${sortedCount} / ${totalFiles} sorted`;
-    const current = fileQueue[0];
-    $("#current-filename").textContent = current ? current.name : "";
   }
 
   // ── Coverflow Rendering ──
@@ -159,10 +161,9 @@
     wrapper.dataset.filename = file.name;
 
     const scale = 1 - stackIndex * SCALE_STEP;
-    const opacity = 1 - stackIndex * OPACITY_STEP;
     const yOffset = Y_OFFSETS[stackIndex] || Y_OFFSETS[Y_OFFSETS.length - 1];
-    wrapper.style.transform = `translateY(${yOffset}px) scale(${scale})`;
-    wrapper.style.opacity = opacity;
+    const shiftUpPx = window.innerHeight * STACK_SHIFT_UP_VH;
+    wrapper.style.transform = `translate(-50%, -50%) translateY(${yOffset - shiftUpPx}px) scale(${scale})`;
     wrapper.style.zIndex = STACK_SIZE - stackIndex;
 
     if (file.type === "video") {
@@ -172,24 +173,20 @@
       video.muted = true;
       video.loop = true;
       video.playsInline = true;
-      video.addEventListener("click", () => {
-        video.muted = !video.muted;
-        const indicator = wrapper.querySelector(".mute-indicator");
-        if (indicator) {
-          indicator.textContent = video.muted ? "Muted" : "Unmuted";
-        }
-      });
       wrapper.appendChild(video);
-      const indicator = document.createElement("div");
-      indicator.className = "mute-indicator";
-      indicator.textContent = "Muted";
-      wrapper.appendChild(indicator);
     } else {
       const img = document.createElement("img");
       img.src = `/media/${encodeURIComponent(file.name)}`;
       img.alt = file.name;
       img.draggable = false;
       wrapper.appendChild(img);
+    }
+
+    if (stackIndex > 0) {
+      const scrim = document.createElement("div");
+      scrim.className = "coverflow-scrim";
+      scrim.style.opacity = Math.min(0.75, stackIndex * SCRIM_OPACITY_STEP);
+      wrapper.appendChild(scrim);
     }
 
     return wrapper;
@@ -217,7 +214,7 @@
     if (video) video.pause();
 
     front.style.transition = "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s cubic-bezier(0.4, 0, 0.6, 1)";
-    front.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.05)`;
+    front.style.transform = `translate(-50%, -50%) translate(${deltaX}px, ${deltaY}px) scale(0.05)`;
     front.style.opacity = "0";
 
     setTimeout(() => {
