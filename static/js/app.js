@@ -420,12 +420,11 @@
 
   // ── Init ──
 
-  async function quitApp() {
-    try {
-      await fetch("/api/quit", { method: "POST" });
-    } catch {
-      // Server exits, connection drops — expected
-    }
+  function quitApp() {
+    $("#setup-screen").classList.add("hidden");
+    $("#sort-screen").classList.add("hidden");
+    $("#goodbye-overlay").classList.remove("hidden");
+    fetch("/api/quit", { method: "POST" }).catch(() => {});
   }
 
   document.addEventListener("keydown", handleKey);
